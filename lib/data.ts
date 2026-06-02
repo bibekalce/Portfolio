@@ -263,6 +263,17 @@ export const experience = {
   ],
 };
 
+export const nonTechnicalSkills = [
+  { name: "Problem Solving",         desc: "Breaking complex problems into clear, workable solutions" },
+  { name: "Technical Communication", desc: "Explaining AI systems and technical designs to non-technical clients" },
+  { name: "Client Presentations",    desc: "Delivered technical and AI feature presentations at Jaba Pty Ltd" },
+  { name: "Research & Analysis",     desc: "Academic and applied research across ML, NLP, and embedded systems" },
+  { name: "Team Collaboration",      desc: "Cross-functional teamwork in academic and professional settings" },
+  { name: "Self-directed Learning",  desc: "Built and deployed independent web projects alongside full-time study" },
+  { name: "Agile / Scrum",           desc: "Applied in university team projects and professional work" },
+  { name: "Attention to Detail",     desc: "Precision in code, documentation, and system design" },
+];
+
 export const education = [
   {
     qualification: "Professional Year Program (ICT)",

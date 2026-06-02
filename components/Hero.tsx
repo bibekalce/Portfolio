@@ -2,12 +2,23 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import HeroCanvas from "./HeroCanvas";
 
 const roles = [
   "AI/ML Graduate",
   "Full-Stack Developer",
   "Cloud Engineer",
   "Problem Solver",
+];
+
+const techChips = [
+  { label: "Python",       top: "12%",  left: "4%",   delay: 0.8,  yRange: [0, -10, 0] },
+  { label: "Azure",        top: "22%",  right: "5%",  delay: 1.0,  yRange: [0, 12, 0]  },
+  { label: "TensorFlow",   top: "72%",  left: "3%",   delay: 1.2,  yRange: [0, -8, 0]  },
+  { label: "Raspberry Pi", top: "78%",  right: "4%",  delay: 0.9,  yRange: [0, 10, 0]  },
+  { label: "FastAPI",      top: "40%",  left: "2%",   delay: 1.1,  yRange: [0, -12, 0] },
+  { label: "IoT",          top: "55%",  right: "3%",  delay: 1.3,  yRange: [0, 8, 0]   },
+  { label: "BERT",         top: "88%",  left: "18%",  delay: 1.0,  yRange: [0, -6, 0]  },
 ];
 
 function useTypewriter(words: string[], typingSpeed = 85, deleteSpeed = 45, pauseMs = 2200) {
@@ -49,17 +60,49 @@ export default function Hero() {
       id="hero"
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
     >
+      {/* Animated neural network + PCB canvas background */}
+      <HeroCanvas />
+
+      {/* Gradient overlay for text readability */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(20,184,166,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.03) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(8,13,26,0.45) 0%, rgba(8,13,26,0.72) 100%)",
         }}
       />
 
-      <div className="absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: "rgba(20,184,166,0.08)" }} />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full blur-3xl" style={{ background: "rgba(14,165,233,0.08)" }} />
+      {/* Ambient glow blobs */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-3xl z-[1]" style={{ background: "rgba(20,184,166,0.06)" }} />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full blur-3xl z-[1]" style={{ background: "rgba(14,165,233,0.06)" }} />
+
+      {/* Floating tech badge chips */}
+      {techChips.map((chip) => (
+        <motion.div
+          key={chip.label}
+          className="absolute z-[2] glass px-3 py-1.5 rounded-full font-mono text-xs text-accent"
+          style={{
+            top: chip.top,
+            left: "left" in chip ? chip.left : undefined,
+            right: "right" in chip ? chip.right : undefined,
+            borderColor: "rgba(20,184,166,0.25)",
+          }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1, y: chip.yRange }}
+          transition={{
+            opacity: { delay: chip.delay, duration: 0.5 },
+            scale:   { delay: chip.delay, duration: 0.5 },
+            y: {
+              delay: chip.delay + 0.5,
+              duration: 3 + Math.random() * 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
+          }}
+        >
+          {chip.label}
+        </motion.div>
+      ))}
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         <motion.p

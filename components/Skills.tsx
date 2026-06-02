@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
-import { skillNodes, skillLinks, skillCategories, skills } from "@/lib/data";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { skillNodes, skillLinks, skillCategories, skills, nonTechnicalSkills } from "@/lib/data";
 
 interface SimNode {
   id: string;
@@ -24,10 +24,13 @@ interface SimLink {
 
 const categoryColor = new Map(skillCategories.map((c) => [c.name, c.color]));
 
+type Tab = "technical" | "professional";
+
 export default function Skills() {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("technical");
   const titleRef = useRef(null);
   const inView = useInView(titleRef, { once: true });
 
@@ -39,6 +42,7 @@ export default function Skills() {
   }, []);
 
   useEffect(() => {
+    if (activeTab !== "technical") return;
     if (isMobile || !svgRef.current || !containerRef.current) return;
 
     let stopped = false;
@@ -163,7 +167,7 @@ export default function Skills() {
     return () => {
       stopped = true;
     };
-  }, [isMobile]);
+  }, [isMobile, activeTab]);
 
   return (
     <section id="skills" className="py-24 px-6">
@@ -175,61 +179,121 @@ export default function Skills() {
           transition={{ duration: 0.6 }}
         >
           <p className="text-accent font-mono text-sm tracking-widest uppercase mb-3">
-            Technical Skills
+            Skills
           </p>
-          <h2 className="text-4xl font-bold text-white mb-3">Skill Constellation</h2>
-          <p className="text-slate-500 mb-10 hidden md:block text-sm">
-            Hover to explore connections. Nodes cluster by domain.
-          </p>
+          <h2 className="text-4xl font-bold text-white mb-6">
+            {activeTab === "technical" ? "Skill Constellation" : "Professional Skills"}
+          </h2>
         </motion.div>
 
-        {/* Desktop: D3 constellation */}
-        <div ref={containerRef} className="hidden md:block">
-          <div className="glass rounded-2xl p-4 overflow-hidden">
-            <svg ref={svgRef} className="w-full" />
-          </div>
-          <div className="flex flex-wrap gap-4 mt-5">
-            {skillCategories.map((cat) => (
-              <div key={cat.name} className="flex items-center gap-1.5 text-xs text-slate-400">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                {cat.name}
-              </div>
-            ))}
-          </div>
+        {/* Tab toggle */}
+        <div className="flex gap-2 mb-10">
+          {(["technical", "professional"] as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2 rounded-full font-mono text-sm transition-all ${
+                activeTab === tab
+                  ? "bg-accent text-navy-950 font-semibold"
+                  : "glass text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {tab === "technical" ? "Technical" : "Professional"}
+            </button>
+          ))}
         </div>
 
-        {/* Mobile: grouped tag pills */}
-        <div className="md:hidden space-y-8">
-          {skillCategories.map((cat) => (
+        <AnimatePresence mode="wait">
+          {activeTab === "technical" ? (
             <motion.div
-              key={cat.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: skillCategories.indexOf(cat) * 0.05 }}
+              key="technical"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35 }}
             >
-              <h3
-                className="text-xs font-mono uppercase tracking-wider mb-3"
-                style={{ color: cat.color }}
-              >
-                {cat.name}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {skills[cat.key]?.map((skill: string) => (
-                  <span
-                    key={skill}
-                    className="px-3 py-1.5 rounded-full text-sm text-slate-300"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: `1px solid ${cat.color}25`,
-                    }}
+              {/* Hint text — desktop only */}
+              <p className="text-slate-500 mb-10 hidden md:block text-sm">
+                Hover to explore connections. Nodes cluster by domain.
+              </p>
+
+              {/* Desktop: D3 constellation */}
+              <div ref={containerRef} className="hidden md:block">
+                <div className="glass rounded-2xl p-4 overflow-hidden">
+                  <svg ref={svgRef} className="w-full" />
+                </div>
+                <div className="flex flex-wrap gap-4 mt-5">
+                  {skillCategories.map((cat) => (
+                    <div key={cat.name} className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                      {cat.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile: grouped tag pills */}
+              <div className="md:hidden space-y-8">
+                {skillCategories.map((cat) => (
+                  <motion.div
+                    key={cat.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: skillCategories.indexOf(cat) * 0.05 }}
                   >
-                    {skill}
-                  </span>
+                    <h3
+                      className="text-xs font-mono uppercase tracking-wider mb-3"
+                      style={{ color: cat.color }}
+                    >
+                      {cat.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {skills[cat.key]?.map((skill: string) => (
+                        <span
+                          key={skill}
+                          className="px-3 py-1.5 rounded-full text-sm text-slate-300"
+                          style={{
+                            background: "rgba(255,255,255,0.04)",
+                            border: `1px solid ${cat.color}25`,
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
-          ))}
-        </div>
+          ) : (
+            <motion.div
+              key="professional"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
+              {nonTechnicalSkills.map((skill, i) => (
+                <motion.div
+                  key={skill.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.07 }}
+                  className="glass rounded-xl p-5 hover:border-accent/30 transition-all group"
+                  style={{
+                    boxShadow: "inset 2px 2px 0 0 rgba(20,184,166,0.12)",
+                  }}
+                >
+                  <p className="text-white font-semibold text-sm mb-2 group-hover:text-accent transition-colors">
+                    {skill.name}
+                  </p>
+                  <p className="text-slate-400 text-sm leading-relaxed">{skill.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
